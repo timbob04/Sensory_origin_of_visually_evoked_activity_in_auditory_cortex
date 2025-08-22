@@ -103,7 +103,7 @@ numCell = length(VO.FRs_Vonset); % number of cells, total
 %% Primary/secondary designation - VO
 
 latThreshold = 0.014; % latency threshold for discriminating between primary-like and secondary-like onset latencies
-percentRequired = 33; % how many significant channels are required to be tuned for a site to be considered primary-like
+percentRequired = 30; % how many significant channels are required to be tuned for a site to be considered primary-like
 
 toneSig = cellfun(@(x) x < alphaLevel, VO.tonePvalsTwoSided_MU, 'UniformOutput', false); % channels with significant responses
 varSig = cellfun(@(x) x < alphaLevel, VO.toneVarFrac_MU, 'UniformOutput', false); % channels with significant FTC variances
@@ -692,6 +692,8 @@ end
 % FR change values (from baseline to Vonset), for all V trials, for the random half and the other half of trials - to create the null distribution
 FRch_base_to_V_ranHalf = nan(numUnits,numIter);
 FRch_base_to_V_otherHalf = nan(numUnits,numIter);
+FRch_base_to_V_ranHalf_notLog = nan(numUnits,numIter);
+FRch_base_to_V_otherHalf_notLog = nan(numUnits,numIter);
 FRdiff_base_to_V_ranHalf = nan(numUnits,numIter);
 FRdiff_base_to_V_otherHalf = nan(numUnits,numIter);
 fprintf('\nGetting FR changes for random half and other half trials for %s iterations: ',num2str(numIter))
@@ -699,6 +701,9 @@ for i = 1:numIter
     % FR change
     FRch_base_to_V_ranHalf(:,i) = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, indsRanHalf(:,i), [-inf inf]);
     FRch_base_to_V_otherHalf(:,i) = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, indsOtherHalf(:,i), [-inf inf]);
+    % FR change - not log2
+    FRch_base_to_V_ranHalf_notLog(:,i) = getFRchangeVals(VO.FRs_baseline, VO.FRs_Vonset, indsRanHalf(:,i));
+    FRch_base_to_V_otherHalf_notLog(:,i) = getFRchangeVals(VO.FRs_baseline, VO.FRs_Vonset, indsOtherHalf(:,i));
     % FR diff
     FRdiff_base_to_V_ranHalf(:,i) = getFRdiff(VO.FRs_baseline, VO.FRs_Vonset, indsRanHalf(:,i));
     FRdiff_base_to_V_otherHalf(:,i) = getFRdiff(VO.FRs_baseline, VO.FRs_Vonset, indsOtherHalf(:,i));
@@ -730,6 +735,7 @@ visRespCell_AC_ranHalf = repmat(fil_reg & VO.probeNum == 1,1,numIter) & pVal_vis
 % Difference values for increased FR cells
 diffFR_ranOther_inc = nan(numIter,1);
 diffFR_sub_ranOther_inc = nan(numIter,1);
+diffFR_ranOther_inc_notLog = nan(numIter,1);
 for i = 1:numIter
     incFR = FRch_base_to_V_ranHalf(:,i) > 0;
     % FR change
@@ -741,6 +747,13 @@ for i = 1:numIter
     group1 = FRdiff_base_to_V_ranHalf(visRespCell_AC_ranHalf(:,i) & incFR,i);
     group2 = FRdiff_base_to_V_otherHalf(visRespCell_AC_ranHalf(:,i) & incFR,i);
     diffFR_sub_ranOther_inc(i) = median(group2 - group1, 'omitnan');
+        
+    % FR change - not log
+    group1 = FRch_base_to_V_ranHalf_notLog(visRespCell_AC_ranHalf(:,i) & incFR,i);
+    group2 = FRch_base_to_V_otherHalf_notLog(visRespCell_AC_ranHalf(:,i) & incFR,i);
+    isInf = isinf(group1) | isinf(group2);
+    diffFR_ranOther_inc_notLog(i) = median(group2(~isInf) - group1(~isInf), 'omitnan');
+    
 end
 
 %}

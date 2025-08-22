@@ -1,3 +1,5 @@
+close all
+
 cd('\\heward.cin.ucsf.edu\work\Tim\Projects\veryNew\visualNeuronsAC\visualAndMovementPaper\Figures\ver3\S11');
 
 saveFigFol = '\\heward.cin.ucsf.edu\work\Tim\Projects\veryNew\visualNeuronsAC\visualAndMovementPaper\Figures\ver3\S11\figFol';
@@ -5,8 +7,8 @@ saveFigFol = '\\heward.cin.ucsf.edu\work\Tim\Projects\veryNew\visualNeuronsAC\vi
 %% Inputs
 
 % The median difference between the V and VO conditions (observed condition)
-med_VvsVO = -0.443; % from the FR change values
-med_VvsVO_diff = -1.92; % from the differences in FRs
+med_VvsVO = -0.3826; % from the FR change values
+med_VvsVO_diff = -2.16; % from the differences in FRs
 
 iterToUse = 4;
 exUnit = 206;
@@ -38,14 +40,14 @@ plot(binCenters,h_other,'r','linewidth',1.5)
 set(gca,'XLim',PSTH_timeWin,'tickdir','out','fontsize',15,...
     'Color','none')
 
-% saveFig(fullfile(saveFigFol,'PSTHs_exUnit'),'-dpdf')
+saveFig(fullfile(saveFigFol,'PSTHs_exUnit'),'-dpdf')
 
 %% Scatter - FR change for random and other half - example iteration
 
 lims = [-1 3];
 xLim = [.6 1.4];
 diffLims = [-1.5 1.5];
-
+        
 incFR = FRch_base_to_V_ranHalf(:,iterToUse) > 0;
 curInd = visRespCell_AC_ranHalf(:,iterToUse) & incFR;
 group1 = FRch_base_to_V_ranHalf(curInd,iterToUse);
@@ -82,6 +84,12 @@ plot(lims,lims,'k:')
 
 % Difference boxplot
 subplot(1,3,3)
+group1 = FRch_base_to_V_ranHalf_notLog(curInd,iterToUse);
+group2 = FRch_base_to_V_otherHalf_notLog(curInd,iterToUse);
+diffs = group2 - group1;
+diffs_lim = diffs;
+diffs_lim(diffs_lim<diffLims(1)) = diffLims(1);
+diffs_lim(diffs_lim>diffLims(2)) = diffLims(2);
 hold all
 divider = 5;
 jitter = (rand(length(group1_lims),1) / divider) - (1/divider/2);
@@ -95,7 +103,7 @@ plot(xLim,[diffFR_ranOther_inc(iterToUse) diffFR_ranOther_inc(iterToUse)],'r')
 set(gca,'XLim',xLim,'YLim',diffLims,'tickdir','out',...
     'LineWidth',1,'fontsize',15,'xtick','','Color','none');
 
-% saveFig(fullfile(saveFigFol,'scatter_ranOther'),'-dpdf')
+saveFig(fullfile(saveFigFol,'scatter_ranOther'),'-dpdf')
 
 numCellsTemp = sum(curInd);
 numRecTemp = length(unique(VO.recNumber(curInd)))
@@ -103,12 +111,12 @@ numMouseTemp = length(unique(VO.mouseID(curInd)))
 
 %% Histogram - FR change
 
-diff_vals = diffFR_ranOther_inc;
+diff_vals = diffFR_ranOther_inc_notLog;
 
 figure
 hold all
-xLim = 0.6;
-xtick = -xLim:0.3:xLim;
+xLim = 0.5;
+xtick = [-xLim 0 xLim];
 xtickLabs = cellfun(@(x) num2str(x,'%.1f'),num2cell(xtick),'UniformOutput',false);
 limPoint = max(abs(diff_vals));
 if limPoint > xLim; error('Histogram xLim not correct'); end
@@ -118,14 +126,14 @@ h = histcounts(diff_vals,bins);
 bar(binCenters,h);
 YLIM = get(gca,'YLim');
 plot([0 0],YLIM,'k:','linewidth',1)
-plot([med_VvsVO med_VvsVO],YLIM,'k:','linewidth',1)
+plot([med_VvsVO med_VvsVO],YLIM,'b:','linewidth',1)
 set(gca,'XLim',[-xLim xLim],'Color','none','box','off','linewidth',1,...
     'tickdir','out','fontsize',14,'xtick',xtick,'xticklabel',xtickLabs)
 xlabel('Mean (\DeltaFR_o_t_h_e_r - \DeltaFR_r_a_n_d_o_m)')
 ylabel('Number of iterations (1000 total)')
 title('Cells with increased V onset FRs')
 
-% saveFig(fullfile(saveFigFol,'histogram'),'-dpdf')
+saveFig(fullfile(saveFigFol,'histogram_change'),'-dpdf')
 
 %% Histogram - difference in FR
 
@@ -153,7 +161,7 @@ xlabel('Mean (\DeltaFR_o_t_h_e_r - \DeltaFR_r_a_n_d_o_m)')
 ylabel('Number of iterations (1000 total)')
 title('Cells with increased V onset FRs')
 
-% saveFig(fullfile(saveFigFol,'histogram'),'-dpdf')
+saveFig(fullfile(saveFigFol,'histogram_diff'),'-dpdf')
 
 
 

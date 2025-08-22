@@ -18,7 +18,7 @@ miceToUse_perCell = repelem(miceToUse,numCellPerRec_VO,1);
 
 % Look at primary AC recordings only, or not
 primarySecondaryInd = true(length(miceToUse_perCell),1);
-% primarySecondaryInd = tunedRec_AC_perCell;
+primarySecondaryInd = tunedRec_AC_perCell;
 
 indRec = ~avoidRec_VO_FM_perCell & miceToUse_perCell & primarySecondaryInd;
 
@@ -380,12 +380,14 @@ signrank(FRch_lowMvmt_temp(curInd),FRch_highMvmt_temp(curInd))
 
 %% Plot - FM scatter - low vs high - split by recording
 
-FRchange_noMvmt = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt,[-inf inf]);
-FRchange_mvmt = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt,[-inf inf]);
+% FRchange_noMvmt = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt,[-inf inf]);
+% FRchange_mvmt = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt,[-inf inf]);
+FRchange_noMvmt = getFRchangeVals(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt);
+FRchange_mvmt = getFRchangeVals(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt);
 
-FRchangeLims_split = [-2.5 2.5];
+FRchangeLims_split = [-5 5];
 yticks = [FRchangeLims_split(1) 0 FRchangeLims_split(2)];
-yTicks = { sprintf('%s%s','\leq','-2.5') '0' sprintf('%s%s','\geq','2.5') };
+yTicks = { sprintf('%s%s','\leq',num2str(FRchangeLims_split(1))) '0' sprintf('%s%s','\geq',num2str(FRchangeLims_split(2))) };
 
 % Cells to plot
 curInd = visRespCell_AC & FRch_base_to_V > 0 & indRec;

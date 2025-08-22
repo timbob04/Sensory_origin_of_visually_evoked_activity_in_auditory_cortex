@@ -40,23 +40,23 @@ h_lOn_BS = histcounts(FR_opto_lim(curInd & VO.BSunits),bins);
 h_lOff_NS = histcounts(FR_noOpto_lim(curInd & ~VO.BSunits),bins);
 h_lOn_NS = histcounts(FR_opto_lim(curInd & ~VO.BSunits),bins);
 
-h_lOff_BS_norm = h_lOff_BS / max(h_lOff_BS);
-h_lOn_BS_norm = h_lOn_BS / max(h_lOn_BS);
-h_lOff_NS_norm = h_lOff_NS / max(h_lOff_NS);
-h_lOn_NS_norm = h_lOn_NS / max(h_lOn_NS);
+h_lOff_BS_norm = (h_lOff_BS / sum(h_lOff_BS))*100;
+h_lOn_BS_norm = (h_lOn_BS / sum(h_lOn_BS))*100;
+h_lOff_NS_norm = (h_lOff_NS / sum(h_lOff_NS))*100;
+h_lOn_NS_norm = (h_lOn_NS / sum(h_lOn_NS))*100;
 
 axes('Position',[.77 .1 .15 .65])
 hold all
 plot(h_lOn_BS_norm,binCenters,'m','linewidth',2)
 plot(h_lOn_NS_norm,binCenters,'c','linewidth',2)
-set(gca,'XLim',[0 1],'YLim',lims,'Color','none','box','off','ytick',[],...
+set(gca,'XLim',[0 100],'YLim',lims,'Color','none','box','off','ytick',[],...
     'tickdir','out')
 
 axes('Position',[.1 .77 .65 .15])
 hold all
 plot(binCenters,h_lOff_BS_norm,'m','linewidth',2)
 plot(binCenters,h_lOff_NS_norm,'c','linewidth',2)
-set(gca,'XLim',lims,'YLim',[0 1],'Color','none','box','off','xtick',[],...
+set(gca,'XLim',lims,'YLim',[0 30],'Color','none','box','off','xtick',[],...
     'tickdir','out')
 
 % saveFig(fullfile(saveFigFol,'VC_FR_V_vs_VO'),'-dpdf')
@@ -208,12 +208,47 @@ numMouseTemp = length(unique(VO.mouseID(curInd)))
 % Group-level stats
 FRchange_noOpto = getFRchangeVals_log2(VO.FRs_baseline,VO.FRs_Vonset,indexToNonOptoCells,[-inf inf]);
 FRchange_opto = getFRchangeVals_log2(VO.FRs_baseline,VO.FRs_Vonset,indexToOptoCells,[-inf inf]);
+
+FRchange_noOpto_notLog2 = getFRchangeVals(VO.FRs_baseline,VO.FRs_Vonset,indexToNonOptoCells);
+FRchange_opto_notLog2 = getFRchangeVals(VO.FRs_baseline,VO.FRs_Vonset,indexToOptoCells);
+
 pVal = signrank(FRchange_noOpto(curInd),FRchange_opto(curInd));
-meanSD = [ mean(FRchange_noOpto(curInd)) std(FRchange_noOpto(curInd)) ; ...
-    mean(FRchange_opto(curInd)) std(FRchange_opto(curInd)) ]
-medDiff_optoEffects_FRchange = median(FRchange_opto(curInd) - FRchange_noOpto(curInd));
+pVal_notLog = signrank(FRchange_noOpto_notLog2(curInd),FRchange_opto_notLog2(curInd));
+meanSD = [ median(FRchange_noOpto_notLog2(curInd)) std(FRchange_noOpto_notLog2(curInd)) ; ...
+    median(FRchange_opto_notLog2(curInd)) std(FRchange_opto_notLog2(curInd)) ];
+medDiff_optoEffects_FRchange = median(FRchange_opto_notLog2(curInd) - FRchange_noOpto_notLog2(curInd));
 
 FRchange_noOpto = getFRdiff(VO.FRs_baseline, VO.FRs_Vonset, indexToNonOptoCells);
 FRchange_opto = getFRdiff(VO.FRs_baseline, VO.FRs_Vonset, indexToOptoCells);
 medDiff_optoEffects_FRdiff = median(FRchange_opto(curInd) - FRchange_noOpto(curInd));
+
+% Difference boxplot
+figure('Position',[1440 918 193 420])
+xLim = [.5 1.5];
+yLim = [-1.5 1.5];
+diffData = FRchange_opto_notLog2(curInd) - FRchange_noOpto_notLog2(curInd);
+diffData_lim = diffData;
+diffData_lim(diffData_lim<yLim(1)) = yLim(1);
+diffData_lim(diffData_lim>yLim(2)) = yLim(2);
+curBS = VO.BSunits(curInd);
+hold all
+divider = 5;
+jitter = (rand(length(diffData),1) / divider) - (1/divider/2);
+xData = ones(length(diffData),1) + jitter;
+scatter(xData(curBS),diffData_lim(curBS),100,'filled',"^",'MarkerFaceColor','k',...
+    'MarkerEdgeColor','none','MarkerFaceAlpha',0.5);
+scatter(xData(~curBS),diffData_lim(~curBS),100,'filled','MarkerFaceColor','k',...
+    'MarkerEdgeColor','none','MarkerFaceAlpha',0.5);
+plot(xLim,[0 0],'k:')
+plot(xLim,[median(diffData) median(diffData)],'r')
+set(gca,'XLim',xLim,'YLim',yLim,'tickdir','out',...
+    'LineWidth',1,'fontsize',15,'xtick','','Color','none',...
+    'ytick',[yLim(1) 0 yLim(2)],'clipping','off');
+
+median(diffData)
+
+
+
+diffData = FRchange_opto_notLog2(curInd) - FRchange_noOpto_notLog2(curInd);
+
 

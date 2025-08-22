@@ -462,16 +462,24 @@ daspect([1 1 1])
 %% Plot - x-y differences (between FR changes)
 
 % FR change for low and high movement trials
-FRch_temp_lowMvmt = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt, [-inf inf]);
-FRch_temp_highMvmt = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt, [-inf inf]);
-FRch_temp_lowMvmt_off = getFRchangeVals_log2(VO.FRs_off_baseline_CMNlen, VO.FRs_off_act_CMNlen, index_noMvmt_off, [-inf inf]);
-FRch_temp_highMvmt_off = getFRchangeVals_log2(VO.FRs_off_baseline_CMNlen,VO.FRs_off_act_CMNlen,index_mvmt_off, [-inf inf]);
+% FRch_temp_lowMvmt = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt, [-inf inf]);
+% FRch_temp_highMvmt = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt, [-inf inf]);
+% FRch_temp_lowMvmt_off = getFRchangeVals_log2(VO.FRs_off_baseline_CMNlen, VO.FRs_off_act_CMNlen, index_noMvmt_off, [-inf inf]);
+% FRch_temp_highMvmt_off = getFRchangeVals_log2(VO.FRs_off_baseline_CMNlen,VO.FRs_off_act_CMNlen,index_mvmt_off, [-inf inf]);
 
-yLims = [-3 3];
-yTick = -3:3:3;
+FRch_temp_lowMvmt = getFRchangeVals(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt);
+FRch_temp_highMvmt = getFRchangeVals(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt);
+FRch_temp_lowMvmt_off = getFRchangeVals(VO.FRs_off_baseline_CMNlen, VO.FRs_off_act_CMNlen, index_noMvmt_off);
+FRch_temp_highMvmt_off = getFRchangeVals(VO.FRs_off_baseline_CMNlen,VO.FRs_off_act_CMNlen,index_mvmt_off);
+
+yLims = [-6 6];
+yTick = -6:6:6;
 
 diff_FRchange_off = FRch_temp_highMvmt_off(curInd_off) - FRch_temp_lowMvmt_off(curInd_off);
 diff_FRchange_V = FRch_temp_highMvmt(curInd_V) - FRch_temp_lowMvmt(curInd_V);
+
+[pVal_oneSampleTest,~] = signrank(diff_FRchange_V,0);
+
 diff_all = [diff_FRchange_V ; diff_FRchange_off];
 diff_all_lims = diff_all;
 diff_all_lims(diff_all_lims<yLims(1)) = yLims(1);
@@ -514,12 +522,12 @@ set(gca,'xtick',[1 2],'XLim',[.5 2.5],...
     'ytick',yTick,...
     'Color','none','clipping','off');
 
-mean_V = mean(diff_FRchange_V,'omitnan');
-SD_V = std(diff_FRchange_V);
+mean_V = median(diff_FRchange_V(~isinf(diff_FRchange_V)),'omitnan');
+SD_V = std(diff_FRchange_V(~isinf(diff_FRchange_V)),'omitnan');
 fprintf('\nV mean +- SD: %s +- %s',num2str(mean_V),num2str(SD_V))
 
-mean_A = mean(diff_FRchange_off);
-SD_A = std(diff_FRchange_off);
+mean_A = median(diff_FRchange_off(~isinf(diff_FRchange_off)),'omitnan');
+SD_A = std(diff_FRchange_off(~isinf(diff_FRchange_off)),'omitnan');
 fprintf('\nA mean +- SD: %s +- %s',num2str(mean_A),num2str(SD_A))
 
 % savename = fullfile(figSaveFol,'low_vs_high_V_and_off_diff');

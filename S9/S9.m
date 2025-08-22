@@ -68,17 +68,29 @@ perOver_CMN_ball_perCell = repelem(perOver_CMN_ball,numCellPerRec_VO);
 allPerOver_CMN_perCell = [ perOver_CMN_noABS_perCell perOver_CMN_ROI_perCell perOver_CMN_ball_perCell ];
 perOverThresh = allPerOver_CMN_perCell >= minPer;
 
+% % FR change for low and high movement trials - unbound
+% FRch_base_to_V_lowMvmt_temp = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt, [-inf inf]);
+% FRch_base_to_V_highMvmt_temp = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt, [-inf inf]);
+% FRch_base_to_V_lowMvmt_ROI_temp = nan(size(FRch_base_to_V_lowMvmt_ROI));
+% FRch_base_to_V_highMvmt_ROI_temp = nan(size(FRch_base_to_V_highMvmt_ROI));
+% for i = 1:4
+%     FRch_base_to_V_lowMvmt_ROI_temp(:,i) = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt_ROI, [-inf inf]);
+%     FRch_base_to_V_highMvmt_ROI_temp(:,i) = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt_ROI, [-inf inf]);
+% end
+% FRch_base_to_V_lowMvmt_ball_temp = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt_ball, [-inf inf]);
+% FRch_base_to_V_highMvmt_ball_temp = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt_ball, [-inf inf]);
+
 % FR change for low and high movement trials - unbound
-FRch_base_to_V_lowMvmt_temp = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt, [-inf inf]);
-FRch_base_to_V_highMvmt_temp = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt, [-inf inf]);
+FRch_base_to_V_lowMvmt_temp = getFRchangeVals(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt);
+FRch_base_to_V_highMvmt_temp = getFRchangeVals(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt);
 FRch_base_to_V_lowMvmt_ROI_temp = nan(size(FRch_base_to_V_lowMvmt_ROI));
 FRch_base_to_V_highMvmt_ROI_temp = nan(size(FRch_base_to_V_highMvmt_ROI));
 for i = 1:4
-    FRch_base_to_V_lowMvmt_ROI_temp(:,i) = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt_ROI, [-inf inf]);
-    FRch_base_to_V_highMvmt_ROI_temp(:,i) = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt_ROI, [-inf inf]);
+    FRch_base_to_V_lowMvmt_ROI_temp(:,i) = getFRchangeVals(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt_ROI);
+    FRch_base_to_V_highMvmt_ROI_temp(:,i) = getFRchangeVals(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt_ROI);
 end
-FRch_base_to_V_lowMvmt_ball_temp = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt_ball, [-inf inf]);
-FRch_base_to_V_highMvmt_ball_temp = getFRchangeVals_log2(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt_ball, [-inf inf]);
+FRch_base_to_V_lowMvmt_ball_temp = getFRchangeVals(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_noMvmt_ball);
+FRch_base_to_V_highMvmt_ball_temp = getFRchangeVals(VO.FRs_baseline, VO.FRs_Vonset, index_noOpto_mvmt_ball);
 
 % Difference in change in FR for high mvmt trials minus low mvmt trials
 allFRCh_lowMvmt = [ FRch_base_to_V_lowMvmt_temp FRch_base_to_V_lowMvmt_ROI_temp FRch_base_to_V_lowMvmt_ball_temp ];
@@ -96,9 +108,9 @@ numSigInd = sum( sigInd & perOverThresh & repmat(curInd,1,6) );
 numToTake = sum( perOverThresh & repmat(curInd,1,6) );
 sumSigInd = (numSigInd ./ numToTake) * 100
 
-FRchangeLims_split = [-3 3];
+FRchangeLims_split = [-5 5];
 yticks = [FRchangeLims_split(1) 0 FRchangeLims_split(2)];
-yTicks = { sprintf('%s%s','\leq','-2.5') '0' sprintf('%s%s','\geq','2.5') };
+yTicks = { sprintf('%s%s','\leq', num2str(FRchangeLims_split(1)) ) '0' sprintf('%s%s','\geq',num2str(FRchangeLims_split(2))) };
 
 FRchange_all = allFRCh_highMvmt - allFRCh_lowMvmt;
 
